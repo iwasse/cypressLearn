@@ -52,7 +52,7 @@ describe('Functional testing', () => {
         cy.xpath(locators.EXTRATO.FN_XP_SEARCH_ELEMENT('Desc','123')).should('exist')
     })
 
-    it.only('Checking Balance', () => {
+    it('Checking Balance', () => {
         //console.log(locators.SALDO.FN_XP_ACC_BALANCE('Conta para alterar'))
        // cy.get(locators.MENU.HOME).click()
         cy.xpath(locators.SALDO.FN_XP_ACC_BALANCE('Conta para saldo')).should('contain', '534,00')
