@@ -14,7 +14,6 @@ describe('Functional testing', () => {
         cy.accessAccMenu()
         cy.insertAcc('My account')
         cy.get(locators.MSG).should('contain.text', 'Conta inserida com sucesso!')
-        cy.get('.toast-info > .toast-close-button').click()
     })
 
     it('Edit account', () => {
