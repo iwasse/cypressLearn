@@ -25,9 +25,6 @@ describe('Functional testing', () => {
            }
        }).its('body.token').should('not.be.empty')
        .then(token => {
-
-            //n = Math.random(n)
-
             cy.request({
                 url: 'https://barrigarest.wcaquino.me/contas',
                 method: 'POST',
