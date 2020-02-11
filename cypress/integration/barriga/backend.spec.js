@@ -12,7 +12,9 @@ describe('Functional testing', () => {
         /* cy.get(locators.MENU.HOME).click() */
     })
 
-    it('Create account', () => {
+    var n = Math.floor(Math.random(n) * 10)
+
+    it('Login', () => {
        cy.request({
            method: 'POST',
            url: 'https://barrigarest.wcaquino.me/signin',
@@ -22,6 +24,28 @@ describe('Functional testing', () => {
                 redirecionar: false
            }
        }).its('body.token').should('not.be.empty')
+       .then(token => {
+
+            //n = Math.random(n)
+
+            cy.request({
+                url: 'https://barrigarest.wcaquino.me/contas',
+                method: 'POST',
+                headers: { Authorization: `JWT ${token}`},
+                body: {
+                    nome: `New accountzor via REST #${n}`
+                }
+             }).as('response')
+          })
+          cy.get('@response').then(res => {
+              expect(res.status).to.be.eq(201)
+              expect(res.body).to.have.property('id')
+              expect(res.body).to.have.property('nome', `New accountzor via REST #${n}`)
+          })
+    })
+
+    it('Insert account', () => {
+
     })
 
     it('Edit account', () => {
