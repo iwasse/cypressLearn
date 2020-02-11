@@ -46,3 +46,61 @@ Cypress.Commands.add('resetApp', () => {
     cy.get(locators.MENU.SETTINGS).click()
     cy.get(locators.MENU.RESET).click()
 })
+
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/_/_/_/_/_/ API COMMANDS _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+//_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+Cypress.Commands.add('getToken', (user, password) => {
+    cy.request({
+        method: 'POST',
+        url: '/signin',
+        body: {
+             email: user,
+             senha: password,
+             redirecionar: false
+        }
+    }).its('body.token').should('not.be.empty')
+    .then(token => {
+        Cypress.env('token', token)
+        return token
+    })
+
+Cypress.Commands.add('resetRest', () => {
+    cy.getToken('isahias@gmail.com', 'japadark').then(token => {
+        cy.request({
+            url: '/reset',
+            method: 'GET',
+            headers: { Authorization: `JWT ${token}`}
+        }).its('status').should('be.equal', 200 )
+    })
+})
+
+Cypress.Commands.add('getAccountByName', accname =>{
+    cy.getToken('isahias@gmail.com', 'japadark').then(token => {
+        cy.request({
+            method: 'GET',
+            url: '/contas',
+            headers: { Authorization: `JWT ${token}`},
+            qs: {
+                nome: accname
+            }
+        })
+    }).then(res => {
+        return res.body[0].id
+    })
+})
+
+Cypress.Commands.overwrite('request', (originalFn, ...options) =>{
+    if(options.length == 1) {
+        if(Cypress.env('token')){
+            options[0].headers = {
+                Authorization: `JWT ${Cypress.env('token')}`
+            }
+        }
+    }
+    
+    return originalFn(...options)
+})
+
+})
