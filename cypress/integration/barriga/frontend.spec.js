@@ -85,7 +85,7 @@ describe('Functional testing', () => {
         cy.get(locators.MSG).should('contain', 'code 400')
     })
 
-    it.only('Creating a transaction', () => {
+    it('Creating a transaction', () => {
 
         cy.route({
             method: 'POST',
@@ -110,14 +110,7 @@ describe('Functional testing', () => {
         cy.route({
             method: 'GET',
             url: '/extrato/**',
-            response: [
-                {"conta":"Conta para movimentacoes","id":51318,"descricao":"Movimentacao para exclusao","envolvido":"AAA","observacao":null,"tipo":"DESP","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"-1500.00","status":true,"conta_id":64949,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
-                {"conta":"Conta com movimentacao","id":51319,"descricao":"Movimentacao de conta","envolvido":"BBB","observacao":null,"tipo":"DESP","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"-1500.00","status":true,"conta_id":64950,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
-                {"conta":"Conta para saldo","id":51320,"descricao":"Movimentacao 1, calculo saldo","envolvido":"CCC","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"3500.00","status":false,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
-                {"conta":"Conta para saldo","id":51321,"descricao":"Movimentacao 2, calculo saldo","envolvido":"DDD","observacao":null,"tipo":"DESP","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"-1000.00","status":true,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
-                {"conta":"Conta para saldo","id":51322,"descricao":"Movimentacao 3, calculo saldo","envolvido":"EEE","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"1534.00","status":true,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
-                {"conta":"Conta para extrato","id":51323,"descricao":"Desc","envolvido":"FFF","observacao":null,"tipo":"DESP","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"123.00","status":true,"conta_id":64952,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null}
-            ]
+            response: 'fixture:movimentacaoSalva'
         })
 
         cy.get(locators.MENU.TRANSACTION).click()
@@ -134,10 +127,19 @@ describe('Functional testing', () => {
         cy.xpath(locators.EXTRATO.FN_XP_SEARCH_ELEMENT('Desc','123.00')).should('exist')
     })
 
-    it('Checking Balance', () => {
+    it.only('Checking Balance', () => {
         //console.log(locators.SALDO.FN_XP_ACC_BALANCE('Conta para alterar'))
        // cy.get(locators.MENU.HOME).click()
-        cy.xpath(locators.SALDO.FN_XP_ACC_BALANCE('Conta para saldo')).should('contain', '534,00')
+
+        cy.route({
+            method: 'GET',
+            url: '/transacoes/**',
+            response: {
+                "conta":"Conta para saldo","id":51322,"descricao":"Movimentacao 3, calculo saldo","envolvido":"EEE","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"1534.00","status":true,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null    
+            }
+        })
+
+        cy.xpath(locators.SALDO.FN_XP_ACC_BALANCE('Conta #02')).should('contain', '1,00')
 
 
         cy.get(locators.MENU.EXTRATO).click()
