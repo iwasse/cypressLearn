@@ -127,7 +127,7 @@ describe('Functional testing', () => {
         cy.xpath(locators.EXTRATO.FN_XP_SEARCH_ELEMENT('Desc','123.00')).should('exist')
     })
 
-    it.only('Checking Balance', () => {
+    it('Checking Balance', () => {
         //console.log(locators.SALDO.FN_XP_ACC_BALANCE('Conta para alterar'))
        // cy.get(locators.MENU.HOME).click()
 
@@ -135,7 +135,17 @@ describe('Functional testing', () => {
             method: 'GET',
             url: '/transacoes/**',
             response: {
-                "conta":"Conta para saldo","id":51322,"descricao":"Movimentacao 3, calculo saldo","envolvido":"EEE","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"1534.00","status":true,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null    
+                "conta":"Conta para saldo","id":51320,"descricao":"Movimentacao 1, calculo saldo","envolvido":"CCC","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"3500.00","status":false,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null
+    
+            }
+        })
+
+        cy.route({
+            method: 'PUT',
+            url: '/transacoes/**',
+            response: {
+                "conta":"Conta para saldo","id":51320,"descricao":"Movimentacao 1, calculo saldo","envolvido":"CCC","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"3500.00","status":false,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null
+    
             }
         })
 
@@ -153,11 +163,22 @@ describe('Functional testing', () => {
         cy.get(locators.MSG).should('contain.text', 'com sucesso')
         cy.get(locators.MENU.HOME).click()
         
-        cy.xpath(locators.SALDO.FN_XP_ACC_BALANCE('Conta para saldo')).should('contain', '4.034,00')
+        cy.xpath(locators.SALDO.FN_XP_ACC_BALANCE('Conta #02')).should('contain', '1,00')
 
     })
 
     it('Removing a transaction', () => {
+
+        cy.route({
+            method: 'DELETE',
+            url: '/transacoes/**',
+            status: 204,
+            response: {
+
+            }
+        }).as('del')
+
+
         cy.get(locators.MENU.EXTRATO).click()
         cy.xpath(locators.EXTRATO.FN_XP_REMOVE_ELEMENT('Movimentacao para exclusao')).click()
         cy.get(locators.MSG).should('contain', 'sucesso')
