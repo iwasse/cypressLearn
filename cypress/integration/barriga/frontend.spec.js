@@ -17,6 +17,16 @@ describe('Functional testing', () => {
         //cy.resetApp()
     })
 
+    it('Should test the resposiveness', () => {
+        cy.get('[data-test=menu-home]').should('exist')
+            .and('be.visible')
+        cy.viewport('ipad-2')
+        cy.get('[data-test=menu-home]').should('exist')
+            .and('be.visible')
+        
+
+    })
+
     it('Insert account', () => {
         cy.route({
             method: 'POST',
@@ -185,4 +195,67 @@ describe('Functional testing', () => {
 
     })
 
+    it('Should validate sent to create an account', () => {
+
+        const reqStub = cy.stub()
+
+        cy.route({
+            method: 'POST',
+            url: '/contas',
+            response: {
+                id: 3, nome: 'Carteira master', visivel: true, usuario_id: 3
+            },
+            /* onRequest: req =>{
+                console.log(req)
+                expect(req.request.body.nome).to.be.empty
+                expect(req.request.headers).to.have.property('Authorization')
+            } */
+            onRequest: reqStub
+        }).as('novaconta')
+
+        cy.accessAccMenu()
+
+        cy.route({
+            method: 'GET',
+            url: '/contas',
+            response: [
+                {id:1, nome:'Carteira', visivel:true, usuario_id:1},
+                {id:2, nome:'Banco', visivel:true, usuario_id:2},
+                {id:3, nome:'Carteira master', visivel:true , usuario_id:3}
+            ]
+        }).as('conta salva')
+
+        cy.insertAcc('{CONTROL}')
+        //cy.wait('@novaconta').its('request.body.nome').should('not.be.empty') // valida se o o insertAcc é vazio
+        cy.wait('@novaconta').then(() => {
+            console.log(reqStub.args[0][0])
+            expect(reqStub.args[0][0].request.body.nome).to.be.empty
+            expect(reqStub.args[0][0].request.headers).to.have.property('Authorization')
+            // o codigo acima é uma das formas de validar se as rotas estão corretas 
+        })
+        cy.get(locators.MSG).should('contain.text', 'Conta inserida com sucesso!')
+    })
+
+
+    it('Should test colors', () => {
+        cy.route({
+            method: 'GET',
+            url: '/extrato/**',
+            response: [
+                {"conta":"Conta para movimentacoes","id":51318,"descricao":"Receita Paga","envolvido":"AAA","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"-1500.00","status":true,"conta_id":64949,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
+                {"conta":"Conta com movimentacao","id":51319,"descricao":"Receita Pendente","envolvido":"BBB","observacao":null,"tipo":"REC","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"-1500.00","status":false,"conta_id":64950,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
+                {"conta":"Conta para saldo","id":51320,"descricao":"Despesa Paga","envolvido":"CCC","observacao":null,"tipo":"DESP","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"3500.00","status":true,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
+                {"conta":"Conta para saldo","id":51321,"descricao":"Despesa pendente","envolvido":"DDD","observacao":null,"tipo":"DESP","data_transacao":"2020-02-12T03:00:00.000Z","data_pagamento":"2020-02-12T03:00:00.000Z","valor":"-1000.00","status":false,"conta_id":64951,"usuario_id":5065,"transferencia_id":null,"parcelamento_id":null},
+            ]
+        })
+
+        cy.get(locators.MENU.EXTRATO).click()
+        cy.xpath(locators.EXTRATO.FN_XP_ROW('Receita Paga')).should('have.class', 'receitaPaga')
+        cy.xpath(locators.EXTRATO.FN_XP_ROW('Receita Pendente')).should('have.class', 'receitaPendente')
+        cy.xpath(locators.EXTRATO.FN_XP_ROW('Despesa Paga')).should('have.class', 'despesaPaga')
+        cy.xpath(locators.EXTRATO.FN_XP_ROW('Despesa pendente')).should('have.class', 'despesaPendente')
+    })
+
+
+    
 })
